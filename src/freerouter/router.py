@@ -47,6 +47,3 @@ class FreeRouter:
         if not ordered:
             ordered = ids
         return ordered[: settings.max_attempts]
-
-
-router = FreeRouter()

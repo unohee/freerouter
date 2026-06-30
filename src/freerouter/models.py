@@ -83,7 +83,3 @@ class ModelRegistry:
         free.sort(key=lambda m: (m.id.endswith(":free"), m.context_length), reverse=True)
         self._models = free
         self._fetched_at = time.monotonic()
-
-
-# 프로세스 전역 레지스트리(앱 lifespan 동안 공유)
-registry = ModelRegistry()

@@ -52,6 +52,45 @@ curl http://127.0.0.1:8000/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"hi"}]}'
 ```
 
+## 라이브러리로 사용 (서버 없이)
+
+HTTP 서버를 띄우지 않고 다른 에이전트 프로그램에 **서브모듈로 임베드**할 수 있다.
+`FreeRouterClient`가 내부에서 무료 모델 목록을 REST로 가져와(TTL 캐시) 폴백 라우팅한다.
+
+```python
+import asyncio
+from freerouter import FreeRouterClient
+
+async def main():
+    async with FreeRouterClient() as fr:           # .env의 OPENROUTER_API_KEY 사용
+        free = await fr.models()                    # 라우팅 가능한 무료 모델 목록
+        data = await fr.chat(
+            [{"role": "user", "content": "안녕"}],
+            model="auto",                           # auto = 무료 풀에서 자동 선택+폴백
+            max_tokens=64,
+        )
+        print(data["model"], data["choices"][0]["message"]["content"])
+
+asyncio.run(main())
+```
+
+동기 코드(이벤트 루프 밖)에서는 sync 래퍼:
+
+```python
+from freerouter import FreeRouterClient
+
+fr = FreeRouterClient(api_key="sk-or-...")          # 키 직접 주입도 가능
+data = fr.chat_sync([{"role": "user", "content": "hi"}], model="auto")
+```
+
+- **httpx 클라이언트 공유**: 에이전트가 이미 `httpx.AsyncClient`를 쓰면 주입 가능 —
+  `FreeRouterClient(http_client=my_client)`. 주입 시 close 책임은 호출자에게 있다.
+- **상태 공유**: `registry`/`router`를 주입하면 여러 클라이언트가 무료 목록 캐시·cooldown 공유.
+- **스트리밍**: `async for chunk in fr.stream_raw(payload)` — raw SSE bytes.
+- 비폴백 4xx(잘못된 요청 등)는 `httpx.HTTPStatusError`, 모든 후보 실패는 `FreeRouterError`.
+
+> 같은 라우팅/폴백 코어를 프록시 서버(`proxy.py`)와 라이브러리가 공유한다.
+
 ## 엔드포인트
 
 | 메서드 | 경로 | 설명 |
