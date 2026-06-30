@@ -1,4 +1,4 @@
-"""라우팅 전략 — 무료 모델을 우선순위 순으로 고르고, cooldown 중인 것은 건너뛴다."""
+"""Routing strategy — order free models by priority, skipping ones in cooldown."""
 
 from __future__ import annotations
 
@@ -9,16 +9,16 @@ from .models import FreeModel
 
 
 class FreeRouter:
-    """폴백 후보 순서를 결정하고 rate-limit cooldown을 추적한다.
+    """Decides the fallback order and tracks rate-limit cooldowns.
 
-    상태는 모델 id → cooldown 만료 시각(monotonic) 매핑 하나뿐이다.
+    Its only state is a mapping of model id -> cooldown expiry (monotonic time).
     """
 
     def __init__(self) -> None:
         self._cooldown_until: dict[str, float] = {}
 
     def penalize(self, model_id: str) -> None:
-        """429 등을 맞은 모델을 cooldown 시킨다(일정 시간 후보에서 제외)."""
+        """Put a model that hit 429 (etc.) into cooldown (excluded for a while)."""
         self._cooldown_until[model_id] = time.monotonic() + settings.cooldown_seconds
 
     def _available(self, model_id: str) -> bool:
@@ -26,12 +26,13 @@ class FreeRouter:
         return until is None or time.monotonic() >= until
 
     def order(self, free_models: list[FreeModel], requested: str | None) -> list[str]:
-        """이번 요청에서 시도할 모델 id 순서를 만든다.
+        """Build the order of model ids to try for this request.
 
-        - requested가 구체적인 무료 모델이면 맨 앞에 둔다.
-        - "auto"/빈 값/미보유 모델이면 레지스트리 우선순위를 따른다.
-        - cooldown 중인 모델은 뒤로 밀되, 후보가 전부 cooldown이면 그대로 시도한다.
-        - 최종적으로 max_attempts 개로 자른다.
+        - If `requested` is a specific free model, put it first.
+        - For "auto"/empty/unknown, follow the registry priority order.
+        - Models in cooldown are pushed to the back; if every candidate is in
+          cooldown, try them anyway.
+        - Finally truncate to max_attempts.
         """
         ids = [m.id for m in free_models]
         ordered: list[str] = []

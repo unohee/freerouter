@@ -1,4 +1,4 @@
-# 환경/시크릿
+# Env / secrets
 .env
 .env.local
 
@@ -12,7 +12,7 @@ dist/
 .venv/
 venv/
 
-# 테스트/캐시
+# Test / cache
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/

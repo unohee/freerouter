@@ -3,37 +3,40 @@
 [![CI](https://github.com/unohee/freerouter/actions/workflows/ci.yml/badge.svg)](https://github.com/unohee/freerouter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-OpenRouter의 **무료 모델 엔드포인트만** 모아 자동 라우팅/폴백하는 OpenAI 호환 프록시.
+An OpenAI-compatible proxy that gathers **only OpenRouter's free model endpoints** and
+routes/falls back across them automatically.
 
-기존 OpenAI SDK/클라이언트를 그대로 붙이면, freerouter가 OpenRouter의 무료 모델 풀
-(`pricing.prompt == 0 && pricing.completion == 0`) 중에서 모델을 골라 호출하고,
-rate limit(429)이나 일시적 오류가 나면 **다음 무료 모델로 자동 폴백**한다.
+Point any existing OpenAI SDK/client at freerouter, and it picks a model from OpenRouter's
+free pool (`pricing.prompt == 0 && pricing.completion == 0`), then **falls back to the next
+free model automatically** on a rate limit (429) or a transient error.
 
-## 동작 방식
+## How it works
 
-1. 시작 시 OpenRouter `/api/v1/models`를 가져와 **무료 모델만 필터링**해 캐시(TTL 기본 600초).
-2. `POST /v1/chat/completions` 요청이 오면 라우터가 후보 순서를 만든다.
-   - `model`이 특정 무료 모델이면 그것을 맨 앞에, 그 외(`auto`/빈 값/유료/미보유)는 무료 풀 우선순위(컨텍스트 큰 순).
-   - 직전에 429를 맞은 모델은 cooldown(기본 60초) 동안 뒤로 밀림.
-3. 후보를 순서대로 시도하다 429/5xx면 다음 모델로 폴백. 모두 실패하면 502.
-4. 응답 헤더 `X-freerouter-Model`에 실제로 사용된 모델 id를 담아 돌려준다.
+1. On startup, fetch OpenRouter `/api/v1/models`, **keep only free models**, and cache them
+   (TTL 600s by default).
+2. On `POST /v1/chat/completions`, the router builds a candidate order.
+   - A specific free `model` goes first; otherwise (`auto`/empty/paid/unknown) the free-pool
+     priority is used (`:free`-suffixed first, then larger context).
+   - A model that just returned 429 is pushed back during its cooldown (60s by default).
+3. Try candidates in order, falling back on 429/402/404/5xx. If all fail, return 502.
+4. The response header `X-freerouter-Model` carries the model actually used.
 
-## 설치
+## Install
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env   # OPENROUTER_API_KEY 채우기
+cp .env.example .env   # fill in OPENROUTER_API_KEY
 ```
 
-## 실행
+## Run
 
 ```bash
-freerouter            # 또는: python -m freerouter
-# 기본 http://127.0.0.1:8000
+freerouter            # or: python -m freerouter
+# defaults to http://127.0.0.1:8000
 ```
 
-## 사용 (OpenAI SDK 그대로)
+## Usage (with the OpenAI SDK as-is)
 
 ```python
 from openai import OpenAI
@@ -41,13 +44,13 @@ from openai import OpenAI
 client = OpenAI(base_url="http://127.0.0.1:8000/v1", api_key="unused")
 
 resp = client.chat.completions.create(
-    model="auto",  # freerouter가 무료 풀에서 자동 선택
-    messages=[{"role": "user", "content": "안녕"}],
+    model="auto",  # freerouter picks from the free pool automatically
+    messages=[{"role": "user", "content": "hello"}],
 )
 print(resp.choices[0].message.content)
 ```
 
-curl 예시:
+curl:
 
 ```bash
 curl http://127.0.0.1:8000/v1/chat/completions \
@@ -55,21 +58,22 @@ curl http://127.0.0.1:8000/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"hi"}]}'
 ```
 
-## 라이브러리로 사용 (서버 없이)
+## Use as a library (no server)
 
-HTTP 서버를 띄우지 않고 다른 에이전트 프로그램에 **서브모듈로 임베드**할 수 있다.
-`FreeRouterClient`가 내부에서 무료 모델 목록을 REST로 가져와(TTL 캐시) 폴백 라우팅한다.
+You can embed freerouter into another agent program **as a submodule** without running an
+HTTP server. `FreeRouterClient` fetches the free-model list over REST (TTL-cached) and routes
+with fallback in-process.
 
 ```python
 import asyncio
 from freerouter import FreeRouterClient
 
 async def main():
-    async with FreeRouterClient() as fr:           # .env의 OPENROUTER_API_KEY 사용
-        free = await fr.models()                    # 라우팅 가능한 무료 모델 목록
+    async with FreeRouterClient() as fr:           # uses OPENROUTER_API_KEY from .env
+        free = await fr.models()                    # routable free models
         data = await fr.chat(
-            [{"role": "user", "content": "안녕"}],
-            model="auto",                           # auto = 무료 풀에서 자동 선택+폴백
+            [{"role": "user", "content": "hello"}],
+            model="auto",                           # auto = pick from the free pool + fallback
             max_tokens=64,
         )
         print(data["model"], data["choices"][0]["message"]["content"])
@@ -77,48 +81,50 @@ async def main():
 asyncio.run(main())
 ```
 
-동기 코드(이벤트 루프 밖)에서는 sync 래퍼:
+In synchronous code (outside an event loop), use the sync wrapper:
 
 ```python
 from freerouter import FreeRouterClient
 
-fr = FreeRouterClient(api_key="sk-or-...")          # 키 직접 주입도 가능
+fr = FreeRouterClient(api_key="sk-or-...")          # passing the key directly also works
 data = fr.chat_sync([{"role": "user", "content": "hi"}], model="auto")
 ```
 
-- **httpx 클라이언트 공유**: 에이전트가 이미 `httpx.AsyncClient`를 쓰면 주입 가능 —
-  `FreeRouterClient(http_client=my_client)`. 주입 시 close 책임은 호출자에게 있다.
-- **상태 공유**: `registry`/`router`를 주입하면 여러 클라이언트가 무료 목록 캐시·cooldown 공유.
-- **스트리밍**: `async for chunk in fr.stream_raw(payload)` — raw SSE bytes.
-- 비폴백 4xx(잘못된 요청 등)는 `httpx.HTTPStatusError`, 모든 후보 실패는 `FreeRouterError`.
+- **Share an httpx client**: if the agent already uses an `httpx.AsyncClient`, inject it —
+  `FreeRouterClient(http_client=my_client)`. When injected, the caller owns its lifecycle.
+- **Share state**: inject `registry`/`router` so several clients share the free-list cache and
+  cooldowns.
+- **Streaming**: `async for chunk in fr.stream_raw(payload)` — raw SSE bytes.
+- A non-retryable 4xx (e.g. a bad request) raises `httpx.HTTPStatusError`; all-candidates-failed
+  raises `FreeRouterError`.
 
-> 같은 라우팅/폴백 코어를 프록시 서버(`proxy.py`)와 라이브러리가 공유한다.
+> The same routing/fallback core is shared by the proxy server (`proxy.py`) and the library.
 
-## 엔드포인트
+## Endpoints
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| POST | `/v1/chat/completions` | OpenAI 호환. 스트리밍(`"stream": true`) 지원. |
-| GET | `/v1/models` | 라우팅 가능한 무료 모델만 노출. |
-| GET | `/health` | 헬스체크. |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/v1/chat/completions` | OpenAI-compatible. Supports streaming (`"stream": true`). |
+| GET | `/v1/models` | Exposes only routable free models. |
+| GET | `/health` | Health check. |
 
-## 설정
+## Configuration
 
-`.env` 또는 환경변수로 제어한다. 전체 목록은 `src/freerouter/config.py` 참조.
+Controlled via `.env` or environment variables. See `src/freerouter/config.py` for the full list.
 
-| 키 | 기본값 | 설명 |
-|----|--------|------|
-| `OPENROUTER_API_KEY` | (필수) | OpenRouter 키 |
-| `MODEL_REFRESH_TTL` | 600 | 무료 목록 캐시 TTL(초) |
-| `MAX_ATTEMPTS` | 8 | 폴백 시도 최대 모델 수 |
-| `COOLDOWN_SECONDS` | 60 | 429 맞은 모델 제외 시간(초) |
+| Key | Default | Description |
+|-----|---------|-------------|
+| `OPENROUTER_API_KEY` | (required) | OpenRouter key |
+| `MODEL_REFRESH_TTL` | 600 | free-list cache TTL (seconds) |
+| `MAX_ATTEMPTS` | 8 | max number of models to try as fallbacks |
+| `COOLDOWN_SECONDS` | 60 | how long to skip a model after a 429 (seconds) |
 
-## 테스트
+## Tests
 
 ```bash
 pytest
 ```
 
-## 라이선스
+## License
 
-MIT — [LICENSE](LICENSE) 참조.
+MIT — see [LICENSE](LICENSE).

@@ -33,5 +33,5 @@ jobs:
         run: ruff check .
 
       - name: Test (pytest)
-        # 단위테스트는 MockTransport/순수 로직 — OpenRouter 키/네트워크 불필요.
+        # Unit tests use MockTransport / pure logic — no OpenRouter key or network.
         run: pytest -q

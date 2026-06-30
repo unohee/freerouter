@@ -1,4 +1,4 @@
-"""라우팅 순서·cooldown 단위테스트."""
+"""Unit tests for routing order and cooldown."""
 
 from freerouter.config import settings
 from freerouter.models import FreeModel
@@ -14,7 +14,7 @@ FREE = [
 def test_order_follows_registry_priority_on_auto():
     r = FreeRouter()
     order = r.order(FREE, "auto")
-    assert order[0] == "a:free"  # 컨텍스트 큰 모델이 레지스트리에서 먼저 정렬됨
+    assert order[0] == "a:free"  # larger-context model is sorted first by the registry
 
 
 def test_requested_model_goes_first():
@@ -33,7 +33,7 @@ def test_penalized_model_pushed_back():
     r = FreeRouter()
     r.penalize("a:free")
     order = r.order(FREE, "auto")
-    assert order[-1] == "a:free"  # cooldown 모델은 뒤로
+    assert order[-1] == "a:free"  # a model in cooldown goes to the back
 
 
 def test_max_attempts_truncates():

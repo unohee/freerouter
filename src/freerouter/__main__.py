@@ -1,4 +1,4 @@
-"""`freerouter` / `python -m freerouter` 진입점 — uvicorn으로 프록시 서버 기동."""
+"""Entry point for `freerouter` / `python -m freerouter` — start the proxy via uvicorn."""
 
 from __future__ import annotations
 

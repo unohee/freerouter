@@ -1,7 +1,7 @@
-"""freerouter — OpenRouter 무료 모델 전용 라우팅.
+"""freerouter — routing limited to OpenRouter's free models.
 
-- 서버로: `python -m freerouter` (OpenAI 호환 프록시)
-- 라이브러리로: `from freerouter import FreeRouterClient`
+- As a server: `python -m freerouter` (OpenAI-compatible proxy)
+- As a library: `from freerouter import FreeRouterClient`
 """
 
 from .client import FreeRouterClient, FreeRouterError

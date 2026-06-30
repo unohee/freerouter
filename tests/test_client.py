@@ -1,4 +1,4 @@
-"""FreeRouterClient 폴백 라우팅 단위테스트 — httpx.MockTransport로 업스트림 가짜 응답."""
+"""FreeRouterClient fallback-routing unit tests — fake upstream via httpx.MockTransport."""
 
 import json
 
@@ -28,7 +28,7 @@ MODELS_BODY = {
 
 
 def _make_client(chat_handler):
-    """models는 고정 응답, chat은 주어진 핸들러로 처리하는 MockTransport 클라이언트."""
+    """Client whose /models returns a fixed body and /chat is handled by chat_handler."""
     calls: list[str] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -50,7 +50,7 @@ async def test_chat_success_first_model():
     fr, calls = _make_client(chat)
     data = await fr.chat([{"role": "user", "content": "hi"}], model="auto")
     assert data["choices"][0]["message"]["content"] == "ok"
-    assert calls[0] == "a:free"  # 우선순위 1순위부터
+    assert calls[0] == "a:free"  # starts from the top priority
 
 
 async def test_chat_falls_back_on_429():
@@ -61,7 +61,7 @@ async def test_chat_falls_back_on_429():
 
     fr, calls = _make_client(chat)
     data = await fr.chat([{"role": "user", "content": "hi"}], model="auto")
-    assert data["model"] == "b:free"  # a 폴백 → b 성공
+    assert data["model"] == "b:free"  # a fell back -> b succeeded
     assert calls == ["a:free", "b:free"]
 
 
@@ -81,7 +81,7 @@ async def test_non_retryable_4xx_propagates():
     fr, calls = _make_client(chat)
     with pytest.raises(httpx.HTTPStatusError):
         await fr.chat([{"role": "user", "content": "hi"}], model="auto")
-    assert calls == ["a:free"]  # 폴백 없이 즉시 전파
+    assert calls == ["a:free"]  # propagated immediately, no fallback
 
 
 async def test_requested_model_first():
@@ -90,4 +90,4 @@ async def test_requested_model_first():
 
     fr, calls = _make_client(chat)
     await fr.chat([{"role": "user", "content": "hi"}], model="b:free")
-    assert calls[0] == "b:free"  # 지정 모델 우선
+    assert calls[0] == "b:free"  # requested model takes priority

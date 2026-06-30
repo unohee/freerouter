@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "freerouter"
 version = "0.1.0"
-description = "OpenAI 호환 프록시 — OpenRouter의 무료 모델 엔드포인트만 모아 자동 라우팅/폴백"
+description = "OpenAI-compatible proxy that gathers only OpenRouter's free models and routes/falls back across them"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"

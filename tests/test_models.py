@@ -1,4 +1,4 @@
-"""무료 판정 로직 단위테스트."""
+"""Unit tests for the free/chat-capable model predicates."""
 
 from freerouter.models import is_chat_capable, is_free
 
@@ -8,7 +8,7 @@ def test_free_by_zero_pricing():
 
 
 def test_free_promo_without_suffix():
-    # :free 접미사가 없어도 가격이 0이면 무료 (예: 프로모 모델)
+    # Free even without a :free suffix when pricing is 0 (e.g. promo models).
     assert is_free({"id": "openrouter/owl-alpha", "pricing": {"prompt": "0", "completion": "0"}})
 
 
@@ -41,5 +41,5 @@ def test_chat_capable_includes_text_among_multi():
 
 
 def test_chat_capable_defaults_true_when_missing():
-    # architecture/output_modalities 없으면 보수적으로 텍스트 모델로 간주
+    # No architecture/output_modalities -> conservatively treat as a text model.
     assert is_chat_capable({"id": "legacy"})
