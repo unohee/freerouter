@@ -1,5 +1,8 @@
 # freerouter
 
+[![CI](https://github.com/unohee/freerouter/actions/workflows/ci.yml/badge.svg)](https://github.com/unohee/freerouter/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 OpenRouter의 **무료 모델 엔드포인트만** 모아 자동 라우팅/폴백하는 OpenAI 호환 프록시.
 
 기존 OpenAI SDK/클라이언트를 그대로 붙이면, freerouter가 OpenRouter의 무료 모델 풀
