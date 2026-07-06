@@ -35,6 +35,7 @@ _26 free, chat-capable models (prompt + completion priced at $0). Auto-generated
 | `qwen/qwen3-coder:free` | 1,048,576 |
 | `nvidia/nemotron-3-ultra-550b-a55b:free` | 1,000,000 |
 | `nvidia/nemotron-3-super-120b-a12b:free` | 1,000,000 |
+| `poolside/laguna-xs-2.1:free` | 262,144 |
 | `poolside/laguna-xs.2:free` | 262,144 |
 | `poolside/laguna-m.1:free` | 262,144 |
 | `google/gemma-4-26b-a4b-it:free` | 262,144 |
@@ -54,7 +55,6 @@ _26 free, chat-capable models (prompt + completion priced at $0). Auto-generated
 | `liquid/lfm-2.5-1.2b-thinking:free` | 32,768 |
 | `liquid/lfm-2.5-1.2b-instruct:free` | 32,768 |
 | `cognitivecomputations/dolphin-mistral-24b-venice-edition:free` | 32,768 |
-| `openrouter/owl-alpha` | 1,048,756 |
 | `google/lyria-3-pro-preview` | 1,048,576 |
 | `google/lyria-3-clip-preview` | 1,048,576 |
 | `openrouter/free` | 200,000 |
