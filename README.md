@@ -35,8 +35,8 @@ _26 free, chat-capable models (prompt + completion priced at $0). Auto-generated
 | `qwen/qwen3-coder:free` | 1,048,576 |
 | `nvidia/nemotron-3-ultra-550b-a55b:free` | 1,000,000 |
 | `nvidia/nemotron-3-super-120b-a12b:free` | 1,000,000 |
+| `tencent/hy3:free` | 262,144 |
 | `poolside/laguna-xs-2.1:free` | 262,144 |
-| `poolside/laguna-xs.2:free` | 262,144 |
 | `poolside/laguna-m.1:free` | 262,144 |
 | `google/gemma-4-26b-a4b-it:free` | 262,144 |
 | `google/gemma-4-31b-it:free` | 262,144 |
