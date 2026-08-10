@@ -33,7 +33,7 @@ _17 free, chat-capable models (prompt + completion priced at $0). Auto-generated
 | Model ID | Context |
 |----------|---------|
 | `nvidia/nemotron-3-ultra-550b-a55b:free` | 1,000,000 |
-| `inclusionai/ling-3.0-flash:free` | 262,144 |
+| `inclusionai/ling-3.0-tiny:free` | 262,144 |
 | `poolside/laguna-s-2.1:free` | 262,144 |
 | `poolside/laguna-xs-2.1:free` | 262,144 |
 | `google/gemma-4-26b-a4b-it:free` | 262,144 |
