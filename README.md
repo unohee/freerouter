@@ -38,6 +38,7 @@ _21 free, chat-capable models (prompt + completion priced at $0). Auto-generated
 | `nvidia/nemotron-3.5-lightning:free` | 1,000,000 |
 | `nvidia/nemotron-3-ultra-550b-a55b:free` | 1,000,000 |
 | `dots-studio/dots-3-note-preview:free` | 512,000 |
+| `inclusionai/ling-3.0-flash-sante:free` | 262,144 |
 | `inclusionai/ling-3.0-flash-fin:free` | 262,144 |
 | `poolside/laguna-s-2.1:free` | 262,144 |
 | `poolside/laguna-xs-2.1:free` | 262,144 |
@@ -45,7 +46,6 @@ _21 free, chat-capable models (prompt + completion priced at $0). Auto-generated
 | `google/gemma-4-31b-it:free` | 262,144 |
 | `nvidia/nemotron-3-super-120b-a12b:free` | 262,144 |
 | `cohere/north-mini-code:free` | 256,000 |
-| `z-ai/glm-5.2:free` | 256,000 |
 | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` | 256,000 |
 | `minimax/minimax-m2.7:free` | 196,608 |
 | `nvidia/nemotron-3.5-content-safety:free` | 128,000 |
