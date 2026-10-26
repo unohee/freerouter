@@ -34,11 +34,11 @@ _20 free, chat-capable models (prompt + completion priced at $0). Auto-generated
 |----------|---------|
 | `thinkingmachines/inkling-small:free` | 1,048,576 |
 | `thinkingmachines/inkling:free` | 1,048,576 |
-| `minimax/minimax-m3.1-flash:free` | 1,000,000 |
 | `nvidia/nemotron-3.5-super-vl:free` | 1,000,000 |
 | `nvidia/nemotron-3.5-lightning:free` | 1,000,000 |
 | `nvidia/nemotron-3-ultra-550b-a55b:free` | 1,000,000 |
 | `dots-studio/dots-3-note-preview:free` | 512,000 |
+| `recursive/flint-v1.0:free` | 262,144 |
 | `xingchen-agi/xing4.0-29b-a4b:free` | 262,144 |
 | `poolside/laguna-s-2.1:free` | 262,144 |
 | `poolside/laguna-xs-2.1:free` | 262,144 |
